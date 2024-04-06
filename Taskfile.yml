@@ -16,7 +16,7 @@ tasks:
     description: build firmware
     cmds:
       - qmk compile 
-      - espeak "success"
+      - espeak -s 400 "build success"
 
 
   flash:
@@ -24,4 +24,4 @@ tasks:
     cmds:
       - task: build
       - qmk flash
-      - espeak "success"
+      - espeak -s 400 "flash success"

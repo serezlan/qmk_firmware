@@ -17,22 +17,27 @@
 #include QMK_KEYBOARD_H
 
 // clang-format off
-//Tap Dance Declarations
-enum {
-  TD_LSFT_INS = 0,
-};
-
-//Tap Dance Definitions
-tap_dance_action_t tap_dance_actions[] = {
-  [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS)
-// Other declarations would go here, separated by commas, if you have them
-};
-
 enum layers{
   MAC_BASE,
   MAC_FN,
   WIN_BASE,
-  WIN_FN
+  WIN_FN,
+  WIN_FN_2
+};
+
+//Tap Dance Declarations
+enum {
+  TD_LSFT_INS = 0,
+  TD_LCTL_WIN = 1,
+  TD_LCTL_WIN_FN_2 = 2,
+};
+
+//Tap Dance Definitions
+tap_dance_action_t tap_dance_actions[] = {
+  [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
+  [TD_LCTL_WIN]  = ACTION_TAP_DANCE_LAYER_MOVE(KC_LCTL, WIN_BASE),
+  [TD_LCTL_WIN_FN_2]  = ACTION_TAP_DANCE_LAYER_MOVE(KC_LCTL, WIN_FN_2)
+// Other declarations would go here, separated by commas, if you have them
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -58,7 +63,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_END,   KC_PGDN,
      KC_BSPC,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_ENT,  KC_QUOT,            KC_SCLN,
      TD(TD_LSFT_INS),            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,             KC_UP,
-     KC_LALT,  KC_LGUI,  KC_LCTL,                                KC_SPC,                                 KC_RALT,  KC_APPLICATION, MO(WIN_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
+     KC_LALT,  KC_LGUI,  TD(TD_LCTL_WIN_FN_2),                                KC_SPC,                                 KC_RALT,  KC_APPLICATION, MO(WIN_FN_2),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
 
 [WIN_FN] = LAYOUT_tkl_ansi(
      KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
@@ -66,6 +71,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      BL_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
      KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,
      KC_TRNS,            KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  BAT_LVL,  NK_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,            KC_TRNS,
-     KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS)
+     KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS),
+
+[WIN_FN_2] = LAYOUT_tkl_ansi(
+     KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
+     KC_TRNS,  BT_HST1,  BT_HST2,  BT_HST3,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS, // second row 
+     BL_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_HOME,  KC_UP,  KC_END,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS, // third row 
+     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_LEFT,  KC_DOWN,  KC_RGHT,  KC_TRNS,  KC_TRNS,            KC_TRNS, // forth row
+     KC_TRNS,            KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  BAT_LVL,  NK_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,            KC_TRNS,
+     KC_TRNS,  KC_TRNS,  TD(TD_LCTL_WIN),                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS)
 
 };

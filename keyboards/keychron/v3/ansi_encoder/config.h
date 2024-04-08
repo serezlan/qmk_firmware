@@ -27,3 +27,5 @@
 
 /* Enable CapsLcok LED */
 #define CAPS_LOCK_LED_INDEX 50
+
+#define TAPPING_TERM 200

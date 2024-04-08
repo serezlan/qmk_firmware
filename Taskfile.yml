@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+
+  build:
+    description: build keychron v3-encoder firmware
+    cmds:
+      - qmk compile -kb keychron/v3/ansi_encoder -km serezlan
+      - espeak -s 400 "build success"
+
+  flash:
+    description: flash keychron v3-encoder firmware
+    cmds:
+      - task: build
+      - qmk flash -kb keychron/v3/ansi_encoder -km serezlan
+      - espeak -s 400 "flash success"

@@ -41,6 +41,6 @@
 /* Set LED driver current */
 #    define CKLED2001_CURRENT_TUNE \
         { 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60 }
-#    define TAPPING_TERM 200
+#    define TAPPING_TERM 150
 
 #endif

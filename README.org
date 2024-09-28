@@ -1,0 +1,12 @@
+* Environment Setup
+
+#+BEGIN_SRC bash
+    # setup python env
+  $ python3 -m venv $HOME/.env/qmk
+  source $HOME/.env/qmk/bin/activate
+  $ pip install qmk
+  # if you already have qmk repo, then cd into it else running "qmk setup" will clone it for you
+  $ qmk setup
+#+END_SRC
+
+

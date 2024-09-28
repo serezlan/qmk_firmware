@@ -15,7 +15,7 @@ tasks:
   build:
     description: build firmware
     cmds:
-      - qmk compile 
+      - qmk compile -kb keychron/k8_pro/ansi/white -km serezlan
       - espeak -s 400 "build success"
 
 
@@ -23,5 +23,6 @@ tasks:
     description: flash to keyboard
     cmds:
       - task: build
+      - qmk flash -kb keychron/k8_pro/ansi/white -km serezlan
       - qmk flash
       - espeak -s 400 "flash success"

@@ -1,0 +1,18 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  flash:
+    cmds:
+      - rm -rf nohup.out
+      - nohup qmk flash -kb lily58 -km serezlan -bl avrdude
+      - espeak -s 400 "success"

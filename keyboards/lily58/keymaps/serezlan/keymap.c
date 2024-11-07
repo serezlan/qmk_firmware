@@ -13,11 +13,6 @@ enum {
   TD_LSFT_INS = 0,
 };
 
-//Tap Dance Definitions
-tap_dance_action_t tap_dance_actions[] = {
-  [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
-};
-
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -33,7 +28,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   XXXXXXX,   XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,                     KC_F7,    KC_F8,    KC_F9,    KC_F10,    KC_F11,    KC_F12,
   XXXXXXX,   XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,                     KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,
   XXXXXXX,  XXXXXXX,   XXXXXXX,    KC_DEL,    KC_LCTL,    XXXXXXX,                     KC_LEFT,    KC_UP,    KC_DOWN,    KC_RIGHT,    XXXXXXX, XXXXXXX,
-  XXXXXXX,  XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,    KC_HOME,    KC_PGUP, KC_PGDN,  KC_END,  XXXXXXX,
+  XXXXXXX,  XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,    KC_HOME,    KC_PGUP, KC_PGDN,  KC_END,  QK_LOCK,
                         XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX
 ),
 
@@ -54,3 +49,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 };
 
+//Tap Dance Definitions
+tap_dance_action_t tap_dance_actions[] = {
+  [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
+};

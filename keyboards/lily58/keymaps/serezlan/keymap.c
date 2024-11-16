@@ -115,17 +115,7 @@ void ql_finished(tap_dance_state_t *state, void *user_data) {
         case TD_SINGLE_HOLD:
             layer_on(_MEDIA);
             break;
-        case TD_DOUBLE_TAP:
-            // Check to see if the layer is already set
-            if (layer_state_is(_MEDIA)) {
-                // If already set, then switch it off
-                layer_off(_MEDIA);
-            } else {
-                // If not already set, then switch the layer on
-                layer_on(_MEDIA);
-            }
-            break;
-        default:
+    default:
             break;
     }
 }

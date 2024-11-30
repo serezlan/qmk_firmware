@@ -12,3 +12,5 @@ SWAP_HANDS_ENABLE = no      # Enable one-hand typing
 OLED_ENABLE = no           # OLED display
 TAP_DANCE_ENABLE=yes
 KEY_LOCK_ENABLE=yes
+
+COMBO_ENABLE = yes

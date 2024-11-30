@@ -12,6 +12,7 @@ tasks:
     silent: true
 
   flash:
+    silent: true
     cmds:
       - rm -rf nohup.out
       - nohup qmk flash -kb lily58 -km serezlan -bl avrdude
@@ -19,12 +20,14 @@ tasks:
 
 
   build:
+    silent: true
     cmds:
       - rm -rf nohup.out
       - nohup qmk compile -kb lily58 -km serezlan
       - espeak -s 400 "success"
 
   flash-default:
+    silent: true
     cmds:
       - rm -rf nohup.out
       - nohup qmk flash -kb lily58 -km default -bl avrdude

@@ -31,6 +31,7 @@ enum {
   QUOT_MEDIA_LAYR, // Our custom tap dance key; add any other tap dance keys to this enum 
   ALPHA_LAYER, 
   BETA_LAYER, 
+  TD_CHARLIE_LAYER, 
 };
 
 // Declare the functions to be used with your tap dance key(s)
@@ -57,7 +58,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_GRV,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
   KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,
   KC_BSPC,  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, TD(QUOT_MEDIA_LAYR),
-  TD(TD_LSFT_INS),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  KC_RSFT,
+  TD(TD_CHARLIE_LAYER),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  KC_RSFT,
   KC_LALT, KC_LGUI, KC_LCTL, TD(BETA_LAYER), KC_ENT, KC_SPC, TD(ALPHA_LAYER), KC_APPLICATION
 ),
 
@@ -105,7 +106,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		XXXXXXX,   XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,                     XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,
 		XXXXXXX,   XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,                     KC_F7,    KC_F8,    KC_F9,    KC_F10,    KC_F11,    KC_F12,
 		XXXXXXX,  XXXXXXX,   KC_LALT,    KC_LGUI,    KC_LCTL,    XXXXXXX,                     KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5, KC_F6,
-		XXXXXXX,  XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX, 
+		_______,  XXXXXXX,   XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,  XXXXXXX,  XXXXXXX, 
 		_______, _______, _______, _______, _______, _______, _______, _______
 ),
 };
@@ -125,6 +126,10 @@ td_state_t cur_dance(tap_dance_state_t *state) {
     } else return TD_UNKNOWN;
 }
 
+// static vars
+static bool insert_hold=false;
+static bool shift_lock=false;
+
 // Initialize tap structure associated with example tap dance key
 static td_tap_t ql_tap_state = {
     .is_press_action = true,
@@ -137,6 +142,11 @@ static td_tap_t alpha_tap_state = {
 };
 
 static td_tap_t beta_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+static td_tap_t charlie_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
@@ -203,6 +213,9 @@ void beta_finished(tap_dance_state_t *state, void *user_data) {
         /* case TD_SINGLE_TAP: */
             /* tap_code(KC_); */
             /* break; */
+      case TD_SINGLE_TAP:
+	  register_code(KC_SPC);
+            break;
         case TD_SINGLE_HOLD:
             layer_on(_RAISE);
             break;
@@ -217,6 +230,8 @@ void beta_finished(tap_dance_state_t *state, void *user_data) {
 void beta_reset(tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
     switch (beta_tap_state.state ) {
+              case TD_SINGLE_TAP: unregister_code(KC_SPC); break;
+
     case TD_SINGLE_HOLD:
         layer_off(_RAISE);
 	break;
@@ -227,9 +242,56 @@ void beta_reset(tap_dance_state_t *state, void *user_data) {
       break;
     }
     
-    ql_tap_state.state = TD_NONE;
+    beta_tap_state.state = TD_NONE;
 }
 
+// charlie
+void charlie_finished(tap_dance_state_t *state, void *user_data) {
+    charlie_tap_state.state = cur_dance(state);
+    switch (charlie_tap_state.state) {
+      case TD_SINGLE_TAP:
+	if(shift_lock) {
+	  shift_lock=false;
+	  unregister_mods(MOD_LSFT);
+	} else {
+	  shift_lock=true;
+	  register_mods(MOD_LSFT);
+	}
+            break;
+        case TD_SINGLE_HOLD:
+	  register_mods(MOD_LSFT);
+            break;
+    case TD_DOUBLE_TAP:
+      if(insert_hold) {
+	insert_hold=false;
+	unregister_code(KC_INS);
+      } else {
+	insert_hold=true;
+	register_code(KC_INS);
+      }
+     break;
+    case TD_DOUBLE_HOLD:
+            break;
+    default:
+            break;
+    }
+}
+
+void charlie_reset(tap_dance_state_t *state, void *user_data) {
+    switch (charlie_tap_state.state ) {
+              case TD_SINGLE_TAP:
+		break;
+    case TD_SINGLE_HOLD:
+      unregister_mods(MOD_LSFT);
+	break;
+    case TD_DOUBLE_HOLD:
+	      break;
+    default:
+      break;
+    }
+    
+    charlie_tap_state.state = TD_NONE;
+}
 
 // Associate our tap dance key with its functionality
 tap_dance_action_t tap_dance_actions[] = {
@@ -237,6 +299,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [QUOT_MEDIA_LAYR] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ql_finished, ql_reset),
     [ALPHA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alpha_finished, alpha_reset),
     [BETA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, beta_finished, beta_reset),
+    [TD_CHARLIE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, charlie_finished, charlie_reset),
 };
 
 // Set a long-ish tapping term for tap-dance keys

@@ -1,3 +1,5 @@
+#include "action.h"
+#include "modifiers.h"
 #include QMK_KEYBOARD_H
 
 enum layer_number {
@@ -32,16 +34,20 @@ enum {
   ALPHA_LAYER, 
   BETA_LAYER, 
   TD_CHARLIE_LAYER, 
+  TD_DELTA_LAYER, 
 };
 
 // Declare the functions to be used with your tap dance key(s)
-
 // Function associated with all tap dances
 td_state_t cur_dance(tap_dance_state_t *state);
 
 // Functions associated with individual tap dances
 void ql_finished(tap_dance_state_t *state, void *user_data);
 void ql_reset(tap_dance_state_t *state, void *user_data);
+void charlie_finished(tap_dance_state_t *state, void *user_data);
+void charlie_reset(tap_dance_state_t *state, void *user_data);
+void delta_finished(tap_dance_state_t *state, void *user_data);
+void delta_reset(tap_dance_state_t *state, void *user_data);
 
 // combo keys
 const uint16_t PROGMEM test_combo1[] = {KC_D, KC_F, COMBO_END};
@@ -53,12 +59,11 @@ combo_t key_combos[] = {
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
   [_BASE] = LAYOUT(
   KC_GRV,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
   KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,
   KC_BSPC,  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, TD(QUOT_MEDIA_LAYR),
-  TD(TD_CHARLIE_LAYER),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  KC_RSFT,
+  TD(TD_CHARLIE_LAYER),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  TD(TD_DELTA_LAYER),
   KC_LALT, KC_LGUI, KC_LCTL, TD(BETA_LAYER), KC_ENT, KC_SPC, TD(ALPHA_LAYER), KC_APPLICATION
 ),
 
@@ -128,7 +133,7 @@ td_state_t cur_dance(tap_dance_state_t *state) {
 
 // static vars
 static bool insert_hold=false;
-static bool shift_lock=false;
+static bool isShift_lock=false;
 
 // Initialize tap structure associated with example tap dance key
 static td_tap_t ql_tap_state = {
@@ -147,6 +152,11 @@ static td_tap_t beta_tap_state = {
 };
 
 static td_tap_t charlie_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+static td_tap_t delta_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
@@ -250,13 +260,6 @@ void charlie_finished(tap_dance_state_t *state, void *user_data) {
     charlie_tap_state.state = cur_dance(state);
     switch (charlie_tap_state.state) {
       case TD_SINGLE_TAP:
-	if(shift_lock) {
-	  shift_lock=false;
-	  unregister_mods(MOD_LSFT);
-	} else {
-	  shift_lock=true;
-	  register_mods(MOD_LSFT);
-	}
             break;
         case TD_SINGLE_HOLD:
 	  register_mods(MOD_LSFT);
@@ -293,6 +296,39 @@ void charlie_reset(tap_dance_state_t *state, void *user_data) {
     charlie_tap_state.state = TD_NONE;
 }
 
+// delta
+void delta_finished(tap_dance_state_t *state, void *user_data) {
+    delta_tap_state.state=cur_dance(state);
+    switch (delta_tap_state.state){
+        case TD_SINGLE_HOLD:
+	  register_mods(MOD_LSFT);
+            break;
+    case TD_DOUBLE_TAP:
+      if(isShift_lock) {
+	isShift_lock=false;
+	unregister_mods(MOD_LSFT);
+      } else {
+	isShift_lock=true;
+	register_mods(MOD_LSFT);
+      }
+     break;
+    default:
+            break;
+    }
+}
+
+void delta_reset(tap_dance_state_t *state, void *user_data) {
+    switch (delta_tap_state.state ) {
+    case TD_SINGLE_HOLD:
+      unregister_mods(MOD_LSFT);
+	break;
+    default:
+      break;
+    }
+    
+    delta_tap_state.state = TD_NONE;
+}
+/********************/
 // Associate our tap dance key with its functionality
 tap_dance_action_t tap_dance_actions[] = {
     [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
@@ -300,6 +336,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [ALPHA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alpha_finished, alpha_reset),
     [BETA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, beta_finished, beta_reset),
     [TD_CHARLIE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, charlie_finished, charlie_reset),
+    [TD_DELTA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, delta_finished, delta_reset),
 };
 
 // Set a long-ish tapping term for tap-dance keys

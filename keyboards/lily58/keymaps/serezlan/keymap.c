@@ -1,5 +1,7 @@
 #include "action.h"
+#include "keycodes.h"
 #include "modifiers.h"
+#include "process_tap_dance.h"
 #include QMK_KEYBOARD_H
 
 enum layer_number {
@@ -35,6 +37,18 @@ enum {
   BETA_LAYER, 
   TD_CHARLIE_LAYER, 
   TD_DELTA_LAYER, 
+  TD_FN1_LAYER, 
+  TD_FN2_LAYER, 
+  TD_FN3_LAYER, 
+  TD_FN4_LAYER, 
+  TD_FN5_LAYER, 
+  TD_FN6_LAYER, 
+  TD_FN7_LAYER, 
+  TD_FN8_LAYER, 
+  TD_FN9_LAYER, 
+  TD_FN10_LAYER, 
+  TD_FN11_LAYER, 
+  TD_FN12_LAYER, 
 };
 
 // Declare the functions to be used with your tap dance key(s)
@@ -60,7 +74,7 @@ combo_t key_combos[] = {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT(
-  KC_GRV,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
+		   TD(TD_FN1_LAYER),   TD(TD_FN2_LAYER),   TD(TD_FN3_LAYER),    TD(TD_FN4_LAYER),    TD(TD_FN5_LAYER),    TD(TD_FN6_LAYER),                     TD(TD_FN7_LAYER),    TD(TD_FN8_LAYER),    TD(TD_FN9_LAYER),    TD(TD_FN10_LAYER),    TD(TD_FN11_LAYER),    TD(TD_FN12_LAYER),
   KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,
   KC_BSPC,  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, TD(QUOT_MEDIA_LAYR),
   TD(TD_CHARLIE_LAYER),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  TD(TD_DELTA_LAYER),
@@ -328,15 +342,28 @@ void delta_reset(tap_dance_state_t *state, void *user_data) {
     
     delta_tap_state.state = TD_NONE;
 }
+
 /********************/
 // Associate our tap dance key with its functionality
 tap_dance_action_t tap_dance_actions[] = {
     [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
     [QUOT_MEDIA_LAYR] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ql_finished, ql_reset),
     [ALPHA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alpha_finished, alpha_reset),
-    [BETA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, beta_finished, beta_reset),
+    [BETA_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_1, KC_2),
     [TD_CHARLIE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, charlie_finished, charlie_reset),
     [TD_DELTA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, delta_finished, delta_reset),
+    [TD_FN1_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_GRV, KC_F1),
+    [TD_FN2_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_1, KC_F2),
+    [TD_FN3_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_2, KC_F3),
+    [TD_FN4_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_3, KC_F4),
+    [TD_FN5_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_4, KC_F5),
+    [TD_FN6_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_5, KC_F6),
+    [TD_FN7_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_6, KC_F7),
+    [TD_FN8_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_7, KC_F8),
+    [TD_FN9_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_8, KC_F9),
+    [TD_FN10_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_9, KC_F10),
+    [TD_FN11_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_0, KC_F11),
+    [TD_FN12_LAYER] = ACTION_TAP_DANCE_DOUBLE(KC_MINUS, KC_F12),
 };
 
 // Set a long-ish tapping term for tap-dance keys

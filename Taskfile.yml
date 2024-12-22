@@ -15,7 +15,8 @@ tasks:
   build:
     description: build firmware
     cmds:
-      - qmk compile -kb keychron/k8_pro/ansi/white -km serezlan
+      - rm -f nohup.out
+      - nohup qmk compile -kb keychron/k8_pro/ansi/white -km serezlan
       - espeak -s 400 "build success"
 
 

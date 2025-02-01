@@ -27,3 +27,9 @@ tasks:
       - qmk flash -kb keychron/k8_pro/ansi/white -km serezlan
       - qmk flash
       - espeak -s 400 "flash success"
+
+
+  install:
+    description: install required tool to build. granted that you've run 'qmk install'
+    cmds:
+      - sudo nala install -y gcc-arm-none-eabi dfu-util

@@ -15,6 +15,8 @@
  */
 
 #include <stdbool.h>
+#include "action.h"
+#include "action_layer.h"
 #include "keycodes.h"
 #include QMK_KEYBOARD_H
 
@@ -46,20 +48,28 @@ typedef struct {
 //Tap Dance Declarations
 enum {
   TD_LSFT_INS = 0,
-  TD_DELTA_LAYER,
+  TD_SHIFTLOCK,
+  TD_WIN_FN_LAYER,
 };
 
 // function used by all TD
 td_state_t cur_dance(tap_dance_state_t *state);
 
 // functions associated with each tap dance
-void delta_finished(tap_dance_state_t *state, void *user_data);
-void delta_reset(tap_dance_state_t *state, void *user_data);
+void shiftlock_finished(tap_dance_state_t *state, void *user_data);
+void shiftlock_reset(tap_dance_state_t *state, void *user_data);
+void win_fn_layer_finished(tap_dance_state_t *state, void *user_data);
+void win_fn_layer_reset(tap_dance_state_t *state, void *user_data);
 
 // static vars for TD
 static bool isShiftLocked = false;
 
-static td_tap_t delta_tap_state = {
+static td_tap_t shiftlock_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+static td_tap_t win_fn_layer_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
@@ -113,9 +123,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [WIN_BASE] = LAYOUT_tkl_ansi(
      KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,   KC_CTANA, BL_STEP,
      KC_GRAVE,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,    KC_HOME,  KC_PGUP,
-     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_SPC,   KC_PGDN,
-     MO(WIN_FN_2),  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,
-     TD(TD_LSFT_INS),            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            TD(TD_DELTA_LAYER),              KC_UP,
+     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_END,   KC_PGDN,
+     TD(TD_WIN_FN_LAYER),  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,
+     TD(TD_LSFT_INS),            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            TD(TD_SHIFTLOCK),              KC_UP,
      KC_LALT,  KC_LGUI,  KC_LCTL,                                KC_SPC,                                 KC_RALT,  KC_APPLICATION, MO(WIN_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RIGHT
 			     ),
 
@@ -148,7 +158,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //Tap Dance Definitions
 tap_dance_action_t tap_dance_actions[] = {
   [TD_LSFT_INS]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_INS),
-      [TD_DELTA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, delta_finished, delta_reset),
+      [TD_SHIFTLOCK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shiftlock_finished, shiftlock_reset),
+      [TD_WIN_FN_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, win_fn_layer_finished, win_fn_layer_reset),
   /* [TD_LCTL_WIN]  = ACTION_TAP_DANCE_LAYER_MOVE(KC_LCTL, WIN_BASE), */
   /* [TD_LCTL_WIN_FN_2]  = ACTION_TAP_DANCE_LAYER_MOVE(KC_LCTL, WIN_FN_2) */
 /* Other declarations would go here, separated by commas, if you have them */
@@ -168,9 +179,9 @@ td_state_t cur_dance(tap_dance_state_t *state) {
     } else return TD_UNKNOWN;
 }
 
-void delta_finished(tap_dance_state_t *state, void *user_data) {
-    delta_tap_state.state=cur_dance(state);
-    switch (delta_tap_state.state){
+void shiftlock_finished(tap_dance_state_t *state, void *user_data) {
+    shiftlock_tap_state.state=cur_dance(state);
+    switch (shiftlock_tap_state.state){
         case TD_SINGLE_HOLD:
 	  register_mods(MOD_LSFT);
             break;
@@ -188,8 +199,8 @@ void delta_finished(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void delta_reset(tap_dance_state_t *state, void *user_data) {
-    switch (delta_tap_state.state ) {
+void shiftlock_reset(tap_dance_state_t *state, void *user_data) {
+    switch (shiftlock_tap_state.state ) {
     case TD_SINGLE_HOLD:
       unregister_mods(MOD_LSFT);
 	break;
@@ -197,5 +208,34 @@ void delta_reset(tap_dance_state_t *state, void *user_data) {
       break;
     }
     
-    delta_tap_state.state = TD_NONE;
+    shiftlock_tap_state.state = TD_NONE;
+}
+
+void win_fn_layer_finished(tap_dance_state_t *state, void *user_data) {
+    win_fn_layer_tap_state.state=cur_dance(state);
+    switch (win_fn_layer_tap_state.state){
+    case TD_SINGLE_TAP:
+      register_code(KC_BSPC);
+      break;
+        case TD_SINGLE_HOLD:
+	  layer_on(WIN_FN_2);
+            break;
+    default:
+            break;
+    }
+}
+
+void win_fn_layer_reset(tap_dance_state_t *state, void *user_data) {
+    switch (win_fn_layer_tap_state.state ) {
+    case TD_SINGLE_TAP:
+      unregister_code(KC_BSPC);
+      break;
+    case TD_SINGLE_HOLD:
+      layer_off(WIN_FN_2);
+	break;
+    default:
+      break;
+    }
+    
+    win_fn_layer_tap_state.state = TD_NONE;
 }

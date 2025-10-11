@@ -19,6 +19,12 @@ tasks:
       - qmk compile -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
       - espeak -s 400 "build success"
 
+  build-compile-json:
+    description: build firmware
+    cmds:
+      - qmk compile --compiledb -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
+      - espeak -s 400 "build success"
+
   build-default:
     description: build firmware
     cmds:

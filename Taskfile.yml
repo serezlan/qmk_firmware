@@ -1,0 +1,41 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+  KB_TARGET: serezlan
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+
+  build:
+    description: build firmware
+    cmds:
+      - qmk compile -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
+      - espeak -s 400 "build success"
+
+  build-default:
+    description: build firmware
+    cmds:
+      - rm -f nohup.out
+      - nohup qmk compile -kb keychron/v3/ansi_encoder -km default
+      - espeak -s 400 "build success"
+
+
+  flash:
+    description: flash to keyboard
+    cmds:
+      - task: build
+      - qmk flash -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
+      - espeak -s 400 "flash success"
+
+
+  install:
+    description: install required tool to build. granted that you've run 'qmk install'
+    cmds:
+      - sudo nala install -y gcc-arm-none-eabi dfu-util

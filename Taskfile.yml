@@ -44,9 +44,9 @@ tasks:
   install:
     description: install required tool to build. granted that you've run 'qmk install'
     cmds:
+      - pip install qmk
       - sudo nala install -y gcc-arm-none-eabi dfu-util
-
-  init:
-    description: initialize repo
-    cmds:
       - make git-submodule
+      - espeak -s 400 "OK"
+
+  

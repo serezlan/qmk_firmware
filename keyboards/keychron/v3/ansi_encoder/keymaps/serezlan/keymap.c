@@ -174,7 +174,7 @@ tap_dance_action_t tap_dance_actions[] = {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
-      return 275;
+      return 100;
     default:
       return TAPPING_TERM;
   }

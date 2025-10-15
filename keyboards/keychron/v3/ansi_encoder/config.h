@@ -28,5 +28,5 @@
 /* Enable CapsLock LED */
 #define CAPS_LOCK_LED_INDEX 50
 
-#define TAPPING_TERM 175
-#define TAPPING_TERM_PER_KEY
+#define TAPPING_TERM 200
+//#define TAPPING_TERM_PER_KEY

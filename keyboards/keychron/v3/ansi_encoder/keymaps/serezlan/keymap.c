@@ -18,8 +18,10 @@
 #include <sys/types.h>
 
 #include "action.h"
+#include "action_layer.h"
 #include "keycode.h"
 #include "keycodes.h"
+#include "keymap_us.h"
 #include "send_string_keycodes.h"
 #include QMK_KEYBOARD_H
 
@@ -29,12 +31,13 @@ enum layers {
   MAC_FN,
   MAC_MEDIA,
   MAC_SPACE,
+  NAV_LAYER,
   WIN_BASE,
   WIN_FN
 };
 // clang-format on
 // Define a type for as many tap dance states as you need
-typedef enum { TD_NONE, TD_UNKNOWN, TD_SINGLE_TAP, TD_SINGLE_HOLD, TD_DOUBLE_TAP } td_state_t;
+typedef enum { TD_NONE, TD_UNKNOWN, TD_SINGLE_TAP, TD_SINGLE_HOLD, TD_DOUBLE_TAP, TD_DOUBLE_HOLD } td_state_t;
 
 typedef struct {
     bool       is_press_action;
@@ -124,6 +127,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 				   _______,            _______,  _______,  _______,  _______,  _______,  M_OPEN_NEW_TAB,  _______,  _______,  _______,  _______,              _______,            _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
 
+    [NAV_LAYER] = LAYOUT_tkl_f13_ansi(
+				   _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FLXP,  RM_VALD,  RM_VALU,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,    RM_TOGG,  _______,  _______,  RM_TOGG,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
+        RM_TOGG,  RM_NEXT,  RM_VALU,  RM_HUEU,  RM_SATU,  RM_SPDU,  _______,  KC_HOME,  KC_UP,  KC_END,  _______,  _______,  _______,    _______,  _______,  _______,  _______, 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_LEFT,  KC_DOWN,  KC_RIGHT,  _______,  _______,              _______,
+				   _______,            _______,  _______,  _______,  _______,  _______,  M_OPEN_NEW_TAB,  _______,  _______,  _______,  _______,              _______,            _______,
+        _______,  _______,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
+
     [WIN_BASE] = LAYOUT_tkl_f13_ansi(
         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,     KC_MUTE,  KC_PSCR,  KC_NO,    RM_NEXT,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,     KC_BSPC,  KC_INS,   KC_HOME,  KC_PGUP,
@@ -158,9 +169,12 @@ td_state_t cur_dance(tap_dance_state_t *state) {
             return TD_SINGLE_TAP;
         else
             return TD_SINGLE_HOLD;
-    } else if (state->count == 2)
-        return TD_DOUBLE_TAP;
-    else
+    } else if (state->count == 2) {
+        if (!state->pressed)
+            return TD_DOUBLE_TAP;
+        else
+            return TD_DOUBLE_HOLD;
+    } else
         return TD_UNKNOWN;
 }
 
@@ -206,6 +220,9 @@ void space_mac_space_finished(tap_dance_state_t *state, void *user_data) {
             tap_code(KC_SPACE);
             break;
         case TD_SINGLE_HOLD:
+            layer_on(NAV_LAYER);
+            break;
+        case TD_DOUBLE_HOLD:
             layer_on(MAC_SPACE);
             break;
         default:
@@ -215,9 +232,17 @@ void space_mac_space_finished(tap_dance_state_t *state, void *user_data) {
 
 void space_mac_space_reset(tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
-    if (space_mac_space_tap_state.state == TD_SINGLE_HOLD) {
-        layer_off(MAC_SPACE);
+    switch (space_mac_space_tap_state.state) {
+        case TD_SINGLE_HOLD:
+            layer_off(NAV_LAYER);
+            break;
+        case TD_DOUBLE_HOLD:
+            layer_off(MAC_SPACE);
+            break;
+        default:
+            break;
     }
+
     space_mac_space_tap_state.state = TD_NONE;
 }
 

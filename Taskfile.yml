@@ -4,7 +4,8 @@ version: '3'
 
 vars:
   GREETING: Hello, World!
-  KB_TARGET: serezlan
+  KB_TARGET: lily58
+  KM_TARGET: default
 
 tasks:
   default:
@@ -16,7 +17,7 @@ tasks:
   build:
     description: build firmware
     cmds:
-      - qmk compile -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
+      - qmk compile -kb {{.KB_TARGET}} -km {{.KM_TARGET}}
       - espeak -s 400 "build success"
 
   build-compile-json:
@@ -37,7 +38,7 @@ tasks:
     description: flash to keyboard
     cmds:
       - task: build
-      - qmk flash -kb keychron/v3/ansi_encoder -km {{.KB_TARGET}}
+      - qmk flash -kb {{.KB_TARGET}} -km {{.KM_TARGET}}
       - espeak -s 400 "flash success"
 
 
@@ -45,6 +46,7 @@ tasks:
     description: install required tool to build. granted that you've run 'qmk install'
     cmds:
       - sudo nala install -y gcc-arm-none-eabi dfu-util
+      - sudo apt install make gcc-avr avr-libc avrdude
 
   init:
     description: initialize repo

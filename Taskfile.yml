@@ -5,7 +5,7 @@ version: '3'
 vars:
   GREETING: Hello, World!
   KB_TARGET: lily58
-  KM_TARGET: default
+  KM_TARGET: serezlan
 
 tasks:
   default:
@@ -37,7 +37,6 @@ tasks:
   flash:
     description: flash to keyboard
     cmds:
-      - task: build
       - qmk flash -kb {{.KB_TARGET}} -km {{.KM_TARGET}}
       - espeak -s 400 "flash success"
 

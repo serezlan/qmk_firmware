@@ -4,24 +4,25 @@ version: '3'
 
 vars:
   GREETING: Hello, World!
-  KB_LILY58: lily58
-  KM_LILY58: serezlan
-  KB_KEYCHRON_V3: keychron/v3/ansi_encoder/
-  KM_KEYCHRON_V3: serezlan
+  
 
+env:
+  ENV: testing
+
+dotenv: ['.env', '{{.ENV}}/.env' ]
+  
 tasks:
   default:
     cmds:
       - echo "{{.GREETING}}"
     silent: true
 
-
-  build-lily58:
-    description: build firmware for lily58 keyboard
+  build:
+    description: build firmware 
     cmds:
-      - qmk compile -kb {{.KB_LILY58}} -km {{.KM_LILY58}}
+      - qmk compile -kb $KB_TARGET -km $KM_TARGET
       - espeak -s 400 "build success"
-
+    
   build-compile-json:
     description: build firmware
     cmds:

@@ -37,10 +37,10 @@ tasks:
       - espeak -s 400 "build success"
 
 
-  flash-lily58:
+  flash:
     description: flash to keyboard
     cmds:
-      - qmk flash -kb {{.KB_LILY58}} -km {{.KM_LILY58}}
+      - qmk flash -kb $KB_TARGET -km $KM_TARGET
       - espeak -s 400 "flash success"
 
 

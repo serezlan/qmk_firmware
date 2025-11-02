@@ -35,9 +35,15 @@ enum layers {
   WIN_BASE,
   WIN_FN
 };
-// clang-format on
 // Define a type for as many tap dance states as you need
-typedef enum { TD_NONE, TD_UNKNOWN, TD_SINGLE_TAP, TD_SINGLE_HOLD, TD_DOUBLE_TAP, TD_DOUBLE_HOLD } td_state_t;
+typedef enum {
+  TD_NONE,
+  TD_UNKNOWN,
+  TD_SINGLE_TAP,
+  TD_SINGLE_HOLD,
+  TD_DOUBLE_TAP,
+  TD_DOUBLE_HOLD } td_state_t;
+// clang-format on
 
 typedef struct {
     bool       is_press_action;
@@ -52,6 +58,7 @@ enum {
     TD_SHIFT_LOCK,
 };
 
+// clang-format on
 // Declare the functions to be used with your tap dance key(s)
 
 // Function associated with all tap dances

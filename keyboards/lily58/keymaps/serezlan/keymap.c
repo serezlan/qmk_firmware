@@ -1,3 +1,5 @@
+#include "action_layer.h"
+#include "config.h"
 #include "keycodes.h"
 #include QMK_KEYBOARD_H
 
@@ -6,7 +8,8 @@ enum layer_number {
     _QWERTY = 0,
     _LOWER,
     _RAISE,
-    _ADJUST,
+    _MEDIA,
+        _ADJUST,
 };
 
 // Tap dance state
@@ -26,8 +29,7 @@ typedef struct {
 
 enum {
     TD_GRV_MEDIA_LAYER,
-    TD_SPACE_LAYER,
-    TD_BSPC_INS,
+    TD_BSPC_RAISE_LAYER,
     TD_DOUBLE_SEMI,
     TD_SHIFT_LOCK,
 };
@@ -38,10 +40,12 @@ enum {
 td_state_t cur_dance(tap_dance_state_t *state);
 
 // functions for each indivitual tap dance
+void grv_media_layer_finished(tap_dance_state_t *state, void *user_data);
+void grv_media_layer_reset(tap_dance_state_t *state, void *user_data);
 void shift_lock_finished(tap_dance_state_t *state, void *user_data);
 void shift_lock_reset(tap_dance_state_t *state, void *user_data);
-void bspc_ins_finished(tap_dance_state_t *state, void *user_data);
-void bspc_ins_reset(tap_dance_state_t *state, void *user_data);
+void bspc_raise_layer_finished(tap_dance_state_t *state, void *user_data);
+void bspc_raise_layer_reset(tap_dance_state_t *state, void *user_data);
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -62,11 +66,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
  [_QWERTY] = LAYOUT(
-  KC_GRAVE,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
+		    TD(TD_GRV_MEDIA_LAYER),   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
   KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQUAL,
-  TD(TD_BSPC_INS),  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
+  KC_INS,  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
   TD(TD_SHIFT_LOCK),  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,  KC_ENT,
-                        KC_LALT, KC_LGUI, KC_LCTL, KC_LCTL, KC_SPC, KC_SPC, KC_BSPC, KC_MENU
+		    KC_LALT, KC_LGUI, KC_LCTL, MO(_LOWER), TD(TD_BSPC_RAISE_LAYER), KC_SPC, KC_RALT, KC_MENU
 ),
 /* LOWER
  * ,-----------------------------------------.                    ,-----------------------------------------.
@@ -83,7 +87,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                   `----------------------------'           '------''--------------------'
  */
 [_LOWER] = LAYOUT(
-  _______, _______, _______, _______, _______, _______,                   _______, _______, _______,_______, _______, _______,
+  _______, _______, _______, _______, _______, _______,                   _______, _______, _______, DT_DOWN, DT_UP, DT_PRNT,
   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,                     KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,
   KC_GRV, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,                   KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_TILD,
   _______, _______, _______, _______, _______, _______, _______, _______, XXXXXXX, KC_UNDS, KC_PLUS, KC_LCBR, KC_RCBR, KC_PIPE,
@@ -111,6 +115,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,   _______, _______,  KC_PLUS, KC_MINS, KC_EQL,  KC_LBRC, KC_RBRC, KC_BSLS,
                              _______, _______, _______,  _______, _______,  _______, _______, _______
 ),
+
+[_MEDIA] = LAYOUT(
+  _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, KC_VOLD, KC_MUTE, KC_VOLU, XXXXXXX, XXXXXXX,
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, KC_MEDIA_PREV_TRACK, KC_MEDIA_PLAY_PAUSE, KC_MEDIA_NEXT_TRACK, XXXXXXX, XXXXXXX,
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+                             _______, _______, _______, _______, _______,  _______, _______, _______
+		  ),
 /* ADJUST
  * ,-----------------------------------------.                    ,-----------------------------------------.
  * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
@@ -131,8 +143,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
                              _______, _______, _______, _______, _______,  _______, _______, _______
-  )
-};
+		     ),
+
+  };
 
 // clang-format on
 
@@ -162,8 +175,9 @@ td_state_t cur_dance(tap_dance_state_t *state) {
 
 static bool is_shift_lock = false;
 // Initialize tap structure associated with example tap dance key
+static td_tap_t grv_media_layer_tap_state   = {.is_press_action = true, .state = TD_NONE};
 static td_tap_t shift_lock_tap_state = {.is_press_action = true, .state = TD_NONE};
-static td_tap_t bspc_ins_tap_state   = {.is_press_action = true, .state = TD_NONE};
+static td_tap_t bspc_raise_layer_tap_state   = {.is_press_action = true, .state = TD_NONE};
 
 // ####################
 void shift_lock_finished(tap_dance_state_t *state, void *user_data) {
@@ -201,31 +215,55 @@ void shift_lock_reset(tap_dance_state_t *state, void *user_data) {
 }
 
 // ####################
-void bspc_ins_finished(tap_dance_state_t *state, void *user_data) {
-    bspc_ins_tap_state.state = cur_dance(state);
-    switch (bspc_ins_tap_state.state) {
+void grv_media_layer_finished(tap_dance_state_t *state, void *user_data) {
+    grv_media_layer_tap_state.state = cur_dance(state);
+    switch (grv_media_layer_tap_state.state) {
         case TD_SINGLE_TAP:
-            tap_code(KC_BSPC);
+            tap_code(KC_GRV);
             break;
         case TD_SINGLE_HOLD:
-            register_code(KC_INS);
+            layer_on(_MEDIA);
             break;
         default:
             break;
     }
 }
 
-void bspc_ins_reset(tap_dance_state_t *state, void *user_data) {
-    if (bspc_ins_tap_state.state == TD_SINGLE_HOLD) {
-        unregister_code(KC_INS);
+void grv_media_layer_reset(tap_dance_state_t *state, void *user_data) {
+    // If the key was held down and now is released then switch off the layer
+    if (grv_media_layer_tap_state.state == TD_SINGLE_HOLD) {
+        layer_off(_MEDIA);
     }
-    bspc_ins_tap_state.state = TD_NONE;
+    grv_media_layer_tap_state.state = TD_NONE;
+}
+
+// ####################
+void bspc_raise_layer_finished(tap_dance_state_t *state, void *user_data) {
+    bspc_raise_layer_tap_state.state = cur_dance(state);
+    switch (bspc_raise_layer_tap_state.state) {
+        case TD_SINGLE_TAP:
+            tap_code(KC_BSPC);
+            break;
+        case TD_SINGLE_HOLD:
+	  layer_on(_RAISE);
+            break;
+        default:
+            break;
+    }
+}
+
+void bspc_raise_layer_reset(tap_dance_state_t *state, void *user_data) {
+    if (bspc_raise_layer_tap_state.state == TD_SINGLE_HOLD) {
+      layer_off(_RAISE);
+    }
+    bspc_raise_layer_tap_state.state = TD_NONE;
 }
 
 // clang-format off
 tap_dance_action_t tap_dance_actions[] = {
     [TD_SHIFT_LOCK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_lock_finished, shift_lock_reset),
-    [TD_BSPC_INS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bspc_ins_finished, bspc_ins_reset),
+    [TD_BSPC_RAISE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bspc_raise_layer_finished, bspc_raise_layer_reset),
+    [TD_GRV_MEDIA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, grv_media_layer_finished, grv_media_layer_reset),
 };
 // clang-format on
 
@@ -234,6 +272,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
             return 275;
         default:
-            return TAPPING_TERM;
+	  return TAPPING_TERM;
     }
 }

@@ -19,6 +19,7 @@
 
 #include "action.h"
 #include "action_layer.h"
+#include "config.h"
 #include "keycode.h"
 #include "keycodes.h"
 #include "keymap_us.h"
@@ -35,6 +36,7 @@ enum layers {
   WIN_BASE,
   WIN_FN
 };
+
 // Define a type for as many tap dance states as you need
 typedef enum {
   TD_NONE,
@@ -65,12 +67,12 @@ enum {
 td_state_t cur_dance(tap_dance_state_t *state);
 
 // Functions associated with individual tap dances
-void grv_mac_media_finished(tap_dance_state_t *state, void *user_data);
-void grv_mac_media_reset(tap_dance_state_t *state, void *user_data);
+void grv_media_layer_finished(tap_dance_state_t *state, void *user_data);
+void grv_media_layer_reset(tap_dance_state_t *state, void *user_data);
 void space_mac_space_finished(tap_dance_state_t *state, void *user_data);
 void space_mac_space_reset(tap_dance_state_t *state, void *user_data);
-void bspc_ins_finished(tap_dance_state_t *state, void *user_data);
-void bspc_ins_reset(tap_dance_state_t *state, void *user_data);
+void bspc_raise_layer_finished(tap_dance_state_t *state, void *user_data);
+void bspc_raise_layer_reset(tap_dance_state_t *state, void *user_data);
 void double_semi_finished(tap_dance_state_t *state, void *user_data);
 void double_semi_reset(tap_dance_state_t *state, void *user_data);
 void shift_lock_finished(tap_dance_state_t *state, void *user_data);
@@ -187,9 +189,9 @@ td_state_t cur_dance(tap_dance_state_t *state) {
 
 static bool is_shift_lock = false;
 // Initialize tap structure associated with example tap dance key
-static td_tap_t grv_mac_media_tap_state   = {.is_press_action = true, .state = TD_NONE};
+static td_tap_t grv_media_layer_tap_state   = {.is_press_action = true, .state = TD_NONE};
 static td_tap_t space_mac_space_tap_state = {.is_press_action = true, .state = TD_NONE};
-static td_tap_t bspc_ins_tap_state        = {.is_press_action = true, .state = TD_NONE};
+static td_tap_t bspc_raise_layer_tap_state        = {.is_press_action = true, .state = TD_NONE};
 static td_tap_t double_semi_tap_state     = {.is_press_action = true, .state = TD_NONE};
 static td_tap_t shift_lock_tap_state      = {.is_press_action = true, .state = TD_NONE};
 
@@ -197,9 +199,9 @@ static td_tap_t shift_lock_tap_state      = {.is_press_action = true, .state = T
 // implementation of our tap dance function
 // --------------------
 
-void grv_mac_media_finished(tap_dance_state_t *state, void *user_data) {
-    grv_mac_media_tap_state.state = cur_dance(state);
-    switch (grv_mac_media_tap_state.state) {
+void grv_media_layer_finished(tap_dance_state_t *state, void *user_data) {
+    grv_media_layer_tap_state.state = cur_dance(state);
+    switch (grv_media_layer_tap_state.state) {
         case TD_SINGLE_TAP:
             tap_code(KC_GRV);
             break;
@@ -211,12 +213,12 @@ void grv_mac_media_finished(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void grv_mac_media_reset(tap_dance_state_t *state, void *user_data) {
+void grv_media_layer_reset(tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
-    if (grv_mac_media_tap_state.state == TD_SINGLE_HOLD) {
+    if (grv_media_layer_tap_state.state == TD_SINGLE_HOLD) {
         layer_off(MAC_MEDIA);
     }
-    grv_mac_media_tap_state.state = TD_NONE;
+    grv_media_layer_tap_state.state = TD_NONE;
 }
 
 // ####################
@@ -289,9 +291,9 @@ void shift_lock_reset(tap_dance_state_t *state, void *user_data) {
 }
 
 // ####################
-void bspc_ins_finished(tap_dance_state_t *state, void *user_data) {
-    bspc_ins_tap_state.state = cur_dance(state);
-    switch (bspc_ins_tap_state.state) {
+void bspc_raise_layer_finished(tap_dance_state_t *state, void *user_data) {
+    bspc_raise_layer_tap_state.state = cur_dance(state);
+    switch (bspc_raise_layer_tap_state.state) {
         case TD_SINGLE_TAP:
             tap_code(KC_BSPC);
             break;
@@ -303,11 +305,11 @@ void bspc_ins_finished(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void bspc_ins_reset(tap_dance_state_t *state, void *user_data) {
-    if (bspc_ins_tap_state.state == TD_SINGLE_HOLD) {
+void bspc_raise_layer_reset(tap_dance_state_t *state, void *user_data) {
+    if (bspc_raise_layer_tap_state.state == TD_SINGLE_HOLD) {
         unregister_code(KC_INS);
     }
-    bspc_ins_tap_state.state = TD_NONE;
+    bspc_raise_layer_tap_state.state = TD_NONE;
 }
 
 // ####################
@@ -333,16 +335,23 @@ void double_semi_reset(tap_dance_state_t *state, void *user_data) {
 // Associate our tap dance key with its functionality
 // --------------------
 
+// clang-format off
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_GRV_MEDIA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, grv_mac_media_finished, grv_mac_media_reset), [TD_SPACE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, space_mac_space_finished, space_mac_space_reset), [TD_BSPC_INS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bspc_ins_finished, bspc_ins_reset), [TD_DOUBLE_SEMI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, double_semi_finished, double_semi_reset), [TD_SHIFT_LOCK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_lock_finished, shift_lock_reset),
+    [TD_GRV_MEDIA_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, grv_media_layer_finished, grv_media_layer_reset),
+    [TD_SPACE_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, space_mac_space_finished, space_mac_space_reset),
+    [TD_BSPC_INS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bspc_raise_layer_finished, bspc_raise_layer_reset),
+    [TD_DOUBLE_SEMI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, double_semi_finished, double_semi_reset),
+    [TD_SHIFT_LOCK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_lock_finished, shift_lock_reset),
 };
+// clang-format on
 
 // Set a long-ish tapping term for tap-dance keys
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
-            return 275;
+            /* return 275; */
+	  return TAPPING_TERM;
         default:
-            return TAPPING_TERM;
+            return 140;
     }
 }
